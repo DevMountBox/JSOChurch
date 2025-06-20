@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "sitjsochurch",
+          "appId": "1:877332308693:android:b907ce12657da5cd95785c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "sitjsochurch",
+          "configurations": {
+            "android": "1:877332308693:android:b907ce12657da5cd95785c",
+            "ios": "1:877332308693:ios:b6f1e5bea9a3bf4595785c",
+            "macos": "1:877332308693:ios:e1a0546469426d2295785c",
+            "web": "1:877332308693:web:50d5bae44e40cd1595785c",
+            "windows": "1:877332308693:web:aed48581ac63236495785c"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
