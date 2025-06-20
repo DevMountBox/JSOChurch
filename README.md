@@ -1,4 +1,4 @@
-# ecommerce
+# JSO CHURCH
 
 A new Flutter project.
 
