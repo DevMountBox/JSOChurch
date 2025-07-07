@@ -873,12 +873,7 @@ class _AddFatherFormState extends State<AddFatherForm> {
                       }
                     },
                     onChanged: (String? newValue) {
-                      // apiValue.selectRelation(newValue!);
-                      // final FormState? formBranch = value
-                      //     .formKeySelectedState.currentState;
-                      // if (formBranch!.validate()) {
-                      //   print('Form is valid');
-                      // }
+                      ev.setBloodGroup(newValue!);
                     },
                     items: ev.bloodGroupList
                         .map<DropdownMenuItem<String>>(

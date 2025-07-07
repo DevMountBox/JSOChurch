@@ -176,6 +176,149 @@ void logoutDialog(BuildContext context, String text, String title) {
     },
   );
 }
+void deleteDialog(BuildContext context, String text, String title,String userId) {
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(6.0)),
+        ),
+        backgroundColor: Colors.white,
+        content: SizedBox(
+          width: 400,
+          child: IntrinsicHeight(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontFamily: "Roboto",
+                    fontSize: 20,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Text(
+                        text,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontFamily: "Roboto",
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: InkWell(
+                        borderRadius:
+                        const BorderRadius.all(Radius.circular(8)),
+                        onTap: () {
+                          Navigator.of(dialogContext).pop(); // Close the dialog
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(10),
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 1,
+                                offset: const Offset(0.5, 0.7),
+                              ),
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 3,
+                                blurRadius: 1,
+                                offset: const Offset(0.5, 0.7),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            "No",
+                            style: TextStyle(
+                              color: buttonBlue,
+                              fontFamily: "Roboto",
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Consumer<EditViewModel>(
+                          builder: (_,ev,__) {
+                            return InkWell(
+                              borderRadius:
+                              const BorderRadius.all(Radius.circular(8)),
+                              onTap: () {
+                               ev.deleteUserProfile(userId);
+                               finish(context);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(10),
+                                height: 40,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: buttonBlue,
+                                  borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      spreadRadius: 2,
+                                      blurRadius: 1,
+                                      offset: const Offset(0.5, 0.7),
+                                    ),
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 3,
+                                      blurRadius: 1,
+                                      offset: const Offset(0.5, 0.7),
+                                    ),
+                                  ],
+                                ),
+                                child: const Text(
+                                  "Yes",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "Roboto",
+                                      fontSize: 18),
+                                ),
+                              ),
+                            );
+                          }
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
 void selectWorkingParish(BuildContext context, String text, String title) {
   showDialog(
     barrierDismissible: false,

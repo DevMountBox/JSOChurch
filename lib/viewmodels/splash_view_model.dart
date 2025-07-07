@@ -87,6 +87,7 @@ class SplashViewModel extends ChangeNotifier{
     }
 
     Map<dynamic, dynamic> userMap = userEvent.snapshot.value as Map;
+
     loginUser = UserModel(
       userId: userId,
       fatherName: userMap['fatherName'] ?? '',
@@ -149,7 +150,8 @@ class SplashViewModel extends ChangeNotifier{
     Map<dynamic, dynamic> loginMap = loginEvent.snapshot.value as Map;
     int userType = loginMap["type"] ?? 0;
     String userId = loginMap["userId"].toString();
-
+    userTypeGlobal=userType;
+    notifyListeners();
     DatabaseEvent userEvent = await mRoot.child("users").child(userId).once();
     if (!userEvent.snapshot.exists) {
       navigateToScreen(const WebLoginView(), context);

@@ -436,75 +436,161 @@ class EditViewModel extends ChangeNotifier {
     showToast("Updated successfully");
     finish(context);
   }
-  Future<void> addUserProfile(BuildContext context,Map<String, dynamic> updateData) async {
+  Future<void> addUserProfile(BuildContext context, Map<String, dynamic> updateData) async {
+    String userId = mRoot.push().key!;
+    String phoneNumber = updateData["phoneNumber"]?.toString() ?? "";
+    String type = updateData["type"]?.toString().toLowerCase() ?? "";
 
-    String userid = mRoot.push().key!;
-    String phoneNumber="";
-    String type ="";
-    Map<String, dynamic> clergyData={};
-    Map<String, dynamic> loginData={};
-    Map<String, dynamic> primaryVicarData={};
-    Map<String, dynamic> secondaryVicarData={};
-    Map<String, dynamic> primaryVicarChurchData={};
+    if (type.isEmpty) {
+      showToast("Please select father type");
+      return;
+    }
 
-    if(updateData["presentAddress"]!=null){
-      clergyData["address"]=updateData["presentAddress"];
-    }
-    if(updateData["type"]!=null){
-      type=updateData["type"];
-    }
-    if(updateData["fatherName"]!=null){
-      clergyData["fatherName"]=updateData["fatherName"];
-    }
-    if(updateData["primaryAt"]!=null){
-      clergyData["vicarAt"]=updateData["primaryAt"];
-    }
-    if(updateData["phoneNumber"]!=null){
-      phoneNumber=updateData["phoneNumber"];
-      loginData["phoneNumber"]=phoneNumber;
-      loginData["userId"]=userid;
-    }
-  if(type!=""){
-    await mRoot.child("logins").child(phoneNumber).update(loginData);
-    await mRoot.child("users").child(userid).update(updateData);
-    await mRoot.child("clergy").child(type).child(userid).update(clergyData);
-    if(selectedStatus.id==1) {
-      if(primaryVicarChurch!=null){
-        primaryVicarData["primaryVicarId"] = userid;
-        primaryVicarData["primaryVicar"] = fatherNameController.text;
-        primaryVicarChurchData["primaryVicar"] = fatherNameController.text;
-        await mRoot.child("churchDetails").child(primaryVicarChurch!.churchId).update(primaryVicarData);
-        await mRoot.child("church").child(primaryVicarChurch!.churchId).update(primaryVicarData);
+    // Build consistent user map
+    Map<String, dynamic> userMap = {
+      "userId": userId,
+      "fatherName": updateData["fatherName"] ?? "",
+      "type": type,
+      "phoneNumber": phoneNumber,
+      "secondaryNumber": updateData["secondaryNumber"] ?? "",
+      "emailId": updateData["emailId"] ?? "",
+      "presentAddress": updateData["presentAddress"] ?? "",
+      "permanentAddress": updateData["permanentAddress"] ?? "",
+      "dob": updateData["dob"] ?? "",
+      "bloodGroup": updateData["bloodGroup"] ?? "",
+      "ordinationDate": updateData["ordinationDate"] ?? "",
+      "ordinationBy": updateData["ordinationBy"] ?? "",
+      "positions": updateData["positions"] ?? "",
+      "status": updateData["status"] ?? 1, // default status = 1 (active)
+      "primaryAt": "",
+      "primaryAtId": "",
+      "secondaryVicarAt": "",
+      "secondaryVicarAtId": ""
+    };
 
+    // Clergy node (basic info)
+    Map<String, dynamic> clergyMap = {
+      "fatherId": userId,
+      "fatherName": updateData["fatherName"] ?? "",
+      "phoneNumber": phoneNumber,
+      "status": updateData["status"] ?? 1,
+      "address": updateData["presentAddress"] ?? "",
+      "type": type,
+      "vicarAt": "",
+      "vicarAtId": "",
+      "secondaryVicarAt": "",
+      "secondaryVicarAtId": ""
+    };
+
+    // Login info
+    Map<String, dynamic> loginMap = {
+      "userId": userId,
+      "phoneNumber": phoneNumber,
+    };
+
+    // Firebase write operations
+    try {
+      await mRoot.child("logins").child(phoneNumber).set(loginMap);
+      await mRoot.child("users").child(userId).set(userMap);
+      await mRoot.child("clergy").child(type).child(userId).set(clergyMap);
+
+      // Handle vicar assignments
+      if (selectedStatus.id == 1) {
+        if (primaryVicarChurch != null) {
+          Map<String, dynamic> primaryVicarData = {
+            "primaryVicarId": userId,
+            "primaryVicar": updateData["fatherName"] ?? "",
+          };
+          await mRoot.child("churchDetails").child(primaryVicarChurch!.churchId).update(primaryVicarData);
+          await mRoot.child("church").child(primaryVicarChurch!.churchId).update(primaryVicarData);
+        }
+
+        if (secondaryVicarChurch != null) {
+          Map<String, dynamic> secondaryVicarData = {
+            "assistantVicarId": userId,
+            "assistantVicar": updateData["fatherName"] ?? "",
+          };
+          await mRoot.child("churchDetails").child(secondaryVicarChurch!.churchId).update(secondaryVicarData);
+          await mRoot.child("church").child(secondaryVicarChurch!.churchId).update(secondaryVicarData);
+        }
       }
-      if(secondaryVicarChurch!=null){
-        secondaryVicarData["assistantVicarId"] = userid;
-        secondaryVicarData["assistantVicar"] =  fatherNameController.text;
-        await mRoot.child("churchDetails").child(secondaryVicarChurch!.churchId).update(secondaryVicarData);
-        await mRoot.child("church").child(secondaryVicarChurch!.churchId).update(secondaryVicarData);
 
+      notifyListeners();
+      showToast("Father added successfully");
+      finish(context);
+    } catch (e) {
+      print("Error adding user: $e");
+      showToast("Error adding father. Please try again.");
+    }
+  }
+  Future<void> deleteUserProfile(String userId) async {
+    print("fatherID:    "+userId);
+    try {
+      final userSnapshot = await mRoot.child("users").child(userId).once();
+      final userData = userSnapshot.snapshot.value as Map?;
+
+      if (userData == null) {
+        showToast("User not found");
+        return;
       }
-    }else{
-      await mRoot.child("users").child(userid).update({
-        "primaryAt": "",
-        "primaryAtId": "",
-        "secondaryVicarAt": "",
-        "secondaryVicarAtId": ""
-      });
-      await mRoot.child("clergy").child(type).child(userid).update({
-        "vicarAt": "",
-        "vicarAtId": "",
-        "secondaryVicarAt": "",
-        "secondaryVicarAtId": ""
+
+      String phoneNumber = userData["phoneNumber"] ?? "";
+      String type = userData["type"] ?? "";
+
+      // Delete from /users
+      await mRoot.child("users").child(userId).remove();
+
+      // Delete from /logins
+      if (phoneNumber.isNotEmpty) {
+        await mRoot.child("logins").child(phoneNumber).remove();
+      }
+
+      // Delete from /clergy
+      if (type.isNotEmpty) {
+        await mRoot.child("clergy").child(type).child(userId).remove();
+      }
+
+      // Optional: clear church roles if needed
+      await clearVicarFromChurchIfAssigned(userId);
+
+      showToast("User deleted successfully");
+      notifyListeners();
+    } catch (e) {
+      print("Error deleting user by userId: $e");
+      showToast("Error deleting user");
+    }
+  }
+  Future<void> clearVicarFromChurchIfAssigned(String userId) async {
+    final churchesSnapshot = await mRoot.child("church").once();
+    final churches = churchesSnapshot.snapshot.value as Map?;
+
+    if (churches != null) {
+      churches.forEach((churchId, data) async {
+        final church = data as Map;
+
+        if (church["primaryVicarId"] == userId) {
+          await mRoot.child("church").child(churchId).update({
+            "primaryVicar": "",
+            "primaryVicarId": "",
+          });
+          await mRoot.child("churchDetails").child(churchId).update({
+            "primaryVicar": "",
+            "primaryVicarId": "",
+          });
+        }
+
+        if (church["assistantVicarId"] == userId) {
+          await mRoot.child("church").child(churchId).update({
+            "assistantVicar": "",
+            "assistantVicarId": "",
+          });
+          await mRoot.child("churchDetails").child(churchId).update({
+            "assistantVicar": "",
+            "assistantVicarId": "",
+          });
+        }
       });
     }
-
-    notifyListeners();
-    showToast("father added successfully");
-    finish(context);
-  }else{
-    showToast("please select father type");
-
   }
-  }
+
 }

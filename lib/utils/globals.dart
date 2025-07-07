@@ -17,7 +17,7 @@ AppModel? appModel;
 List<MultiDioceseModel> multiDioceseList=[];
 bool isSecretaryAdminLogin=false;
 String secretaryDioceseIdAdmin="";
-
+int userTypeGlobal=0;
 Future<int> getChurchCount(String dioceseId) async {
   final DatabaseReference churchesRef = mRoot
       .child("diocese")

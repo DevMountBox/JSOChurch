@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../utils/buttons.dart';
 import '../utils/excel_to_json.dart';
+import '../utils/globals.dart';
 import '../utils/my_colors.dart';
 import '../utils/my_functions.dart';
 import '../viewmodels/clergy_view_model.dart';
@@ -86,20 +87,20 @@ class FatherUploadView extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          // MyElevatedButton(
-                          //   height: 30,
-                          //   width: 150,
-                          //   onPressed: () {
-                          //    addFatherDialog(context);
-                          //   },
-                          //   borderRadius:
-                          //   const BorderRadius.all(
-                          //       Radius.circular(60)),
-                          //   child: Text(
-                          //       "+ Add Father",
-                          //       style:AppTextStyles.interWhite12BoldStyle
-                          //   ),
-                          // ),
+                          MyElevatedButton(
+                            height: 30,
+                            width: 150,
+                            onPressed: () {
+                             addFatherDialog(context);
+                            },
+                            borderRadius:
+                            const BorderRadius.all(
+                                Radius.circular(60)),
+                            child: Text(
+                                "+ Add Father",
+                                style:AppTextStyles.interWhite12BoldStyle
+                            ),
+                          ),
                           const SizedBox(width: 20,),
                           Consumer<ClergyViewModel>(
                               builder: (_,value,__) {
@@ -215,9 +216,9 @@ class FatherUploadView extends StatelessWidget {
                     height: 45,
                     color: Colors.grey.withOpacity(0.3),
                     padding: EdgeInsets.symmetric(horizontal: 7),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Padding(
                             padding: EdgeInsets.only(right: 8.0, left: 8),
@@ -231,7 +232,7 @@ class FatherUploadView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Text(
                             "PHONE NUMBER",
@@ -242,7 +243,7 @@ class FatherUploadView extends StatelessWidget {
                                 color: Colors.black),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Text(
                             "IN CHARGE",
@@ -253,7 +254,7 @@ class FatherUploadView extends StatelessWidget {
                                 color: Colors.black),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Text(
                             "STATUS",
@@ -264,7 +265,7 @@ class FatherUploadView extends StatelessWidget {
                                 color: Colors.black),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Text(
                             "ADDRESS",
@@ -275,7 +276,7 @@ class FatherUploadView extends StatelessWidget {
                                 color: Colors.black),
                           ),
                         ),
-                        Expanded(
+                        const Expanded(
                           flex: 1,
                           child: Text(
                             "IMAGE",
@@ -286,6 +287,17 @@ class FatherUploadView extends StatelessWidget {
                                 color: Colors.black),
                           ),
                         ),
+                        userTypeGlobal==2?   SizedBox(
+                          width: 120,
+                          child: Text(
+                            "ACTION",
+                            style: TextStyle(
+                                fontFamily: "PoppinsB",
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                        ):SizedBox(),
                       ],
                     ),
                   ),
@@ -379,6 +391,19 @@ class FatherUploadView extends StatelessWidget {
               }
             ):customNormalText(text:"Image uploaded", color: myBlack, fontSize: 15),
           ),
+          userTypeGlobal==2?  Expanded(
+            flex: 1,
+            child:Consumer2<WebViewModel,EditViewModel>(
+              builder: (_,wv,ev,__) {
+                return InkWell(
+                    onTap: (){
+                      print(clergy.fatherId);
+                      deleteDialog(context, "Do you want to remove father ${clergy.fatherName}", "Delete", clergy.fatherId);
+                    },
+                    child: Icon(Icons.delete_sweep,color: myRed,));
+              }
+            ),
+          ):SizedBox(),
         ],
       ),
     );

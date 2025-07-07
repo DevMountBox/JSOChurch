@@ -83,6 +83,8 @@ Future<void> userAuthorized(BuildContext context,String phoneNumber,
       Map<dynamic, dynamic> loginMap = event.snapshot.value as Map;
       String userId = loginMap["userId"].toString();
       int userType = loginMap["type"] ?? 0;
+      userTypeGlobal=userType;
+      notifyListeners();
       if(userType!=2){
 
         mRoot
