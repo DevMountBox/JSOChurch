@@ -1,12 +1,15 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:jsochurch/models/clergy_model.dart';
+import 'package:jsochurch/utils/my_functions.dart';
 
 import '../utils/globals.dart';
 
 class ClergyViewModel extends ChangeNotifier{
   List<ClergyModel> clergyList=[];
   List<ClergyModel> filteredClergyList=[];
+  List<ClergyModel> clergyListByDiocese=[];
+  List<ClergyModel> filteredClergyListByDiocese=[];
   int? tabIndex;
   int inputChipTag = 0;
   String clergy = "";
@@ -122,11 +125,21 @@ class ClergyViewModel extends ChangeNotifier{
 
     notifyListeners();
   }
-  Future<void> getClergyListByDiocese(String dioceseId) async {
-    print("🔍 Fetching churches for dioceseId: $dioceseId");
+  void searchClergyByDiocese(String query) {
+    filteredClergyListByDiocese = clergyListByDiocese.where((church) {
+      final fatherNameLower = church.fatherName.toLowerCase();
+      final vicarAtLower = church.vicarAt.toLowerCase();
+      final queryLower = query.toLowerCase();
 
-    clergyList = [];
-    filteredClergyList = [];
+      return fatherNameLower.contains(queryLower) ||
+          vicarAtLower.contains(queryLower);
+    }).toList();
+
+    notifyListeners();
+  }
+  Future<void> getClergyListByDiocese(String dioceseId) async {
+    clergyListByDiocese = [];
+    filteredClergyListByDiocese = [];
     notifyListeners();
 
     // Step 1: Get all church IDs under the given diocese
@@ -136,34 +149,19 @@ class ClergyViewModel extends ChangeNotifier{
         .child("churches")
         .get();
 
-    if (!churchesSnapshot.exists) {
-      print("⚠️ No churches found under this diocese.");
-      return;
-    }
+    if (!churchesSnapshot.exists) return;
 
     final Set<String> churchIds = churchesSnapshot.children
         .map((e) => e.key!)
         .toSet();
 
-    print("🏛️ Churches found under diocese: $churchIds");
-
     // Step 2: Get all users
     final usersSnapshot = await mRoot.child("users").get();
-    if (!usersSnapshot.exists) {
-      print("⚠️ No users found.");
-      return;
-    }
+    if (!usersSnapshot.exists) return;
 
     // Step 3: Get clergy data
     final clergySnapshot = await mRoot.child("clergy").get();
-    if (!clergySnapshot.exists) {
-      print("⚠️ No clergy data found.");
-      return;
-    }
-
-    print("👤 Checking each user...");
-
-    int matchedCount = 0;
+    if (!clergySnapshot.exists) return;
 
     for (final user in usersSnapshot.children) {
       final data = user.value as Map<dynamic, dynamic>?;
@@ -182,9 +180,6 @@ class ClergyViewModel extends ChangeNotifier{
       final isDioceseMatch = (assistantId == dioceseId) || (primaryId == dioceseId);
 
       if (isChurchMatch || isDioceseMatch) {
-        print("✅ Matched user: $userId");
-
-        // Search in each type (subnode) under clergy
         for (final typeNode in clergySnapshot.children) {
           final typeMap = typeNode.value as Map<dynamic, dynamic>;
           if (typeMap.containsKey(userId)) {
@@ -202,121 +197,64 @@ class ClergyViewModel extends ChangeNotifier{
               priority: value["priority"] ?? 100,
             );
 
-            clergyList.add(clergyModel);
-            filteredClergyList.add(clergyModel);
-            matchedCount++;
-
-            print("📥 Added clergy: ${clergyModel.fatherName} (${clergyModel.fatherId})");
+            clergyListByDiocese.add(clergyModel);
+            filteredClergyListByDiocese.add(clergyModel);
             break;
           }
         }
-      } else {
-        print("⛔ No match for user: $userId");
       }
     }
 
-    // Sort alphabetically
-    clergyList.sort((a, b) => a.fatherName.compareTo(b.fatherName));
-    filteredClergyList.sort((a, b) => a.fatherName.compareTo(b.fatherName));
+    clergyListByDiocese.sort((a, b) => a.fatherName.compareTo(b.fatherName));
+    filteredClergyListByDiocese.sort((a, b) => a.fatherName.compareTo(b.fatherName));
 
-    print("🎯 Total clergy added: $matchedCount");
     notifyListeners();
   }
-  Future<int> getFathersCountByDiocese(String dioceseId) async {
-    print("🔍 Fetching churches for dioceseId: $dioceseId");
-
-    // Step 1: Get all church IDs under the given diocese
-    final churchesSnapshot = await mRoot
-        .child("diocese")
-        .child(dioceseId)
-        .child("churches")
-        .get();
-
-    if (!churchesSnapshot.exists) {
-      print("⚠️ No churches found under this diocese.");
-      return 0;
-    }
-
-    final Set<String> churchIds = churchesSnapshot.children
-        .map((e) => e.key!)
-        .toSet();
-
-    print("🏛️ Churches found under diocese: $churchIds");
-
-    // Step 2: Get all users
-    final usersSnapshot = await mRoot.child("users").get();
-    if (!usersSnapshot.exists) {
-      print("⚠️ No users found.");
-      return 0;
-    }
-
-    int count = 0;
-
-    print("👤 Checking each user...");
-
-    for (final user in usersSnapshot.children) {
-      final data = user.value as Map<dynamic, dynamic>?;
-
-      if (data == null) continue;
-
-      final userId = user.key;
-      final vicarAtId = data['vicarAtId']?.toString();
-      final secondaryVicarAtId = data['secondaryVicarAtId']?.toString();
-      final assistantId = data['assistantId']?.toString();
-      final primaryId = data['primaryId']?.toString();
-
-      final isChurchMatch = (vicarAtId != null && churchIds.contains(vicarAtId)) ||
-          (secondaryVicarAtId != null && churchIds.contains(secondaryVicarAtId));
-
-      final isDioceseMatch = (assistantId == dioceseId) || (primaryId == dioceseId);
-
-      if (isChurchMatch || isDioceseMatch) {
-        print("✅ Matched user: $userId");
-        print("   - vicarAtId: $vicarAtId");
-        print("   - secondaryVicarAtId: $secondaryVicarAtId");
-        print("   - assistantId: $assistantId");
-        print("   - primaryId: $primaryId");
-
-        count++;
-      } else {
-        print("⛔ No match for user: $userId");
-      }
-    }
-
-    print("✅ Total matched fathers: $count");
-    return count;
-  }
-  Future<void> promoteDeaconToPriest(String userId) async {
+  Future<void> promoteDeaconToPriest(
+      BuildContext context,
+      BuildContext dialogContext,
+      String userId,
+      String ordinationBy,
+      String ordinationDate,
+      ) async {
     final DatabaseReference clergyRef = mRoot.child("clergy");
     final DatabaseReference userRef = mRoot.child("users").child(userId);
 
-    // Step 1: Get the deacon data from clergy
+    // Get the deacon data from clergy
     final deaconSnapshot = await clergyRef.child("deacons").child(userId).get();
-
-    if (!deaconSnapshot.exists) {
-      print("❌ Deacon with ID $userId does not exist.");
-      return;
-    }
+    if (!deaconSnapshot.exists) return;
 
     final deaconData = deaconSnapshot.value;
 
-    // Step 2: Move to priest node
+    // Move to priest node
     await clergyRef.child("priest").child(userId).set(deaconData);
-    print("✅ Moved to priest node.");
 
-    // Step 3: Remove from deacon node
+    // Remove from deacon node
     await clergyRef.child("deacons").child(userId).remove();
-    print("🗑️ Removed from deacon node.");
 
-    // Step 4: Update user type
+    // Update user type and ordination details
     final userSnapshot = await userRef.get();
     if (userSnapshot.exists) {
       await userRef.update({
         "type": "priest",
+        "ordinationBy": ordinationBy,
+        "ordinationDate": ordinationDate,
       });
-      print("🔁 User type updated to 'priest'.");
-    } else {
-      print("⚠️ User with ID $userId not found in users node.");
+    }
+
+    finish(dialogContext);
+    finish(context);
+  }
+  Future<void> clearDobFromUser(String userId) async {
+    final DatabaseReference userRef = mRoot.child("users").child(userId);
+
+    try {
+      await userRef.update({
+        "dob": "",
+      });
+      print("✅ DOB cleared (set to empty string) for userId: $userId");
+    } catch (e) {
+      print("❌ Failed to clear DOB: $e");
     }
   }
 

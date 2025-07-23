@@ -136,7 +136,7 @@ Future<void> userAuthorized(BuildContext context,String phoneNumber,
             if (loginUser!.status != 0) {
               callNextReplacement(NavbarView(), context);
             } else {
-              if(loginUser!.type!="metropolitans") {
+              if(loginUser!.type!="metropolitans"&&loginUser!.type!="deacons") {
                 callNextReplacement(const SelectParishDetailView(), context);
               }else{
                 callNextReplacement(NavbarView(), context);

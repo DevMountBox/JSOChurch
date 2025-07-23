@@ -17,10 +17,17 @@ UserModel? primaryVicar;
 UserModel? secondaryVicar;
 UserModel? secondDioceseMetropolitan;
 
+bool _isLoading = false;
+bool get isLoading => _isLoading;
 
+void _setLoading(bool value) {
+  _isLoading = value;
+  notifyListeners();
+}
 final GlobalKey<ScaffoldState> scaffoldDiocese = GlobalKey<ScaffoldState>();
 final GlobalKey<ScaffoldState> scaffoldChurch = GlobalKey<ScaffoldState>();
 final GlobalKey<ScaffoldState> scaffoldFather = GlobalKey<ScaffoldState>();
+final GlobalKey<ScaffoldState> scaffoldFatherByDiocese = GlobalKey<ScaffoldState>();
 Future<int> getChurchCount(String dioceseId) async {
   final DatabaseReference churchesRef = mRoot
       .child("diocese")
@@ -36,16 +43,18 @@ Future<int> getChurchCount(String dioceseId) async {
   }
 }
 void getDioceseDetails(String dioceseId) {
-  primaryVicar=null;
-  secondaryVicar=null;
-  secondDioceseMetropolitan=null;
-  dioceseDetailModel=null;
+  _setLoading(true); // show loader
+
+  primaryVicar = null;
+  secondaryVicar = null;
+  secondDioceseMetropolitan = null;
+  dioceseDetailModel = null;
   notifyListeners();
+
   mRoot.child("dioceseDetails").child(dioceseId).onValue.listen((event) async {
     if (event.snapshot.exists) {
       Map<dynamic, dynamic> dioceseMap = event.snapshot.value as Map;
 
-      // Extracting the region keys into a list
       List<String> regionList = [];
       if (dioceseMap["region"] != null) {
         Map<dynamic, dynamic> regionMap = dioceseMap["region"];
@@ -53,6 +62,7 @@ void getDioceseDetails(String dioceseId) {
       }
 
       int churchCount = await getChurchCount(dioceseMap["dioceseId"]);
+      fatherCountByDiocese = await getFathersCountByDiocese(dioceseMap["dioceseId"]);
 
       dioceseDetailModel = DioceseDetailModel(
         dioceseId: dioceseMap["dioceseId"] ?? "",
@@ -70,23 +80,28 @@ void getDioceseDetails(String dioceseId) {
         dioceseSecretaryId: dioceseMap["secretaryId"] ?? "",
         image: dioceseMap["image"] ?? "",
       );
-      if(dioceseMap["metropolitanId"]!=null&&dioceseMap["metropolitanId"]!=""){
-        primaryVicar=await getFatherDetailsIn(dioceseMap["metropolitanId"]);
 
+      if (dioceseMap["metropolitanId"]?.toString().isNotEmpty ?? false) {
+        primaryVicar = await getFatherDetailsIn(dioceseMap["metropolitanId"]);
       }
-      if(dioceseMap["secretaryId"]!=null&&dioceseMap["secretaryId"]!=""){
-        secondaryVicar=await getFatherDetailsIn(dioceseMap["secretaryId"]);
 
+      if (dioceseMap["secretaryId"]?.toString().isNotEmpty ?? false) {
+        secondaryVicar = await getFatherDetailsIn(dioceseMap["secretaryId"]);
       }
-      if (multiDioceseList.any((diocese) => diocese.dioceseId == dioceseId)){
-        MultiDioceseModel matchingDiocese = multiDioceseList.firstWhere(
-              (diocese) => diocese.dioceseId ==dioceseId,
+
+      if (multiDioceseList.any((d) => d.dioceseId == dioceseId)) {
+        final matchingDiocese = multiDioceseList.firstWhere(
+              (d) => d.dioceseId == dioceseId,
         );
-        secondDioceseMetropolitan=await getFatherDetailsIn(matchingDiocese.metropolitanId);
+        secondDioceseMetropolitan = await getFatherDetailsIn(matchingDiocese.metropolitanId);
       }
 
-        notifyListeners();
+      _setLoading(false); // hide loader
+    } else {
+      _setLoading(false); // hide loader even if data doesn't exist
     }
+
+    notifyListeners();
   });
 }
 void getChurchDetails(String churchId) {

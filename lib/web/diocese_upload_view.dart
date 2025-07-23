@@ -15,10 +15,12 @@ import '../utils/alert_diologs.dart';
 import '../utils/app_text_styles.dart';
 import '../utils/buttons.dart';
 import '../utils/excel_to_json.dart';
+import '../utils/globals.dart';
 import '../utils/my_functions.dart';
 import '../viewmodels/detailed_view_model.dart';
 import '../viewmodels/report_view_model.dart';
 import '../widgets/adapter_widgets.dart';
+import 'father_by_diocese_view.dart';
 
 class DioceseUploadView extends StatelessWidget {
   const DioceseUploadView({super.key});
@@ -261,30 +263,50 @@ class DioceseUploadView extends StatelessWidget {
                     ],
                   ),
                 ),
-                Consumer<SelectDioceseViewModel>(builder: (_, dv, __) {
+                Consumer2<SelectDioceseViewModel,DetailedViewModel>(builder: (_, sdv,dv, __) {
                   return Expanded(
-                      child: ListView.builder(
-                    itemCount: dv.filteredDioceseList.length,
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      var item = dv.filteredDioceseList[index];
-        
-                      Color backgroundColor =
-                          index % 2 == 0 ? Colors.white : Colors.grey[200]!;
-        
-                      return Material(
-                        color: backgroundColor,
-                        child: Consumer<DetailedViewModel>(builder: (_, dv, __) {
-                          return InkWell(
-                              onTap: () {
-                                dv.getDioceseDetails(item.dioceseId);
-                                dv.scaffoldDiocese.currentState!.openEndDrawer();
-                              },
-                              child: diocese(context, item));
-                        }),
-                      );
-                    },
-                  ));
+                      child: Stack(
+                        children: [
+
+                          ListView.builder(
+                                              itemCount: sdv.filteredDioceseList.length,
+                                              shrinkWrap: true,
+                                              itemBuilder: (BuildContext context, int index) {
+                          var item = sdv.filteredDioceseList[index];
+
+                          Color backgroundColor =
+                              index % 2 == 0 ? Colors.white : Colors.grey[200]!;
+
+                          return Material(
+                            color: backgroundColor,
+                            child: Consumer<DetailedViewModel>(builder: (_, dv, __) {
+                              return InkWell(
+                                onTap: dv.isLoading
+                                    ? null
+                                    : () {
+                                  dv.getDioceseDetails(item.dioceseId);
+                                  dv.scaffoldDiocese.currentState!.openEndDrawer();
+                                },
+                                child: diocese(context, item),
+                              );
+                            }),
+                          );
+                                              },
+                                            ),
+                          if (dv.isLoading)
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.black.withOpacity(0.3),
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ));
                 })
               ],
             ),
@@ -474,6 +496,30 @@ class DioceseUploadView extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(vertical: 10.0),
                                   child: detailsAdapter(context, "dioceses",
                                       "${dv.dioceseDetailModel!.noOfChurches} churches"),
+                                ),
+                              );
+                            }
+                          ),
+                          Divider(
+                            color: myChipText.withOpacity(.25),
+                            indent: 5,
+                            endIndent: 5,
+                          ),
+                          Consumer4<WebViewModel,SelectChurchViewModel,SelectDioceseViewModel,ClergyViewModel>(
+                            builder: (_,wv,scv,sdv,cv,__) {
+                              return InkWell(
+
+                                onTap: (){
+                                  if(fatherCountByDiocese!=0){
+                                    cv.getClergyListByDiocese(dv.dioceseDetailModel!.dioceseId);
+                                    callNext(FatherByDioceseView(), context);
+                                  }
+                                },
+
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                                  child: detailsAdapter(context, "clergy",
+                                      "$fatherCountByDiocese Fathers"),
                                 ),
                               );
                             }

@@ -18,6 +18,7 @@ List<MultiDioceseModel> multiDioceseList=[];
 bool isSecretaryAdminLogin=false;
 String secretaryDioceseIdAdmin="";
 int userTypeGlobal=0;
+int fatherCountByDiocese=0;
 Future<int> getChurchCount(String dioceseId) async {
   final DatabaseReference churchesRef = mRoot
       .child("diocese")
@@ -31,6 +32,46 @@ Future<int> getChurchCount(String dioceseId) async {
   } else {
     return 0;
   }
+}
+Future<int> getFathersCountByDiocese(String dioceseId) async {
+  // Step 1: Get all church IDs under the given diocese
+  final churchesSnapshot = await mRoot
+      .child("diocese")
+      .child(dioceseId)
+      .child("churches")
+      .get();
+
+  if (!churchesSnapshot.exists) return 0;
+
+  final Set<String> churchIds =
+  churchesSnapshot.children.map((e) => e.key!).toSet();
+
+  // Step 2: Get all users
+  final usersSnapshot = await mRoot.child("users").get();
+  if (!usersSnapshot.exists) return 0;
+
+  int count = 0;
+
+  for (final user in usersSnapshot.children) {
+    final data = user.value as Map<dynamic, dynamic>?;
+    if (data == null) continue;
+
+    final vicarAtId = data['vicarAtId']?.toString();
+    final secondaryVicarAtId = data['secondaryVicarAtId']?.toString();
+    final assistantId = data['assistantId']?.toString();
+    final primaryId = data['primaryId']?.toString();
+
+    final isChurchMatch = (vicarAtId != null && churchIds.contains(vicarAtId)) ||
+        (secondaryVicarAtId != null && churchIds.contains(secondaryVicarAtId));
+
+    final isDioceseMatch = (assistantId == dioceseId) || (primaryId == dioceseId);
+
+    if (isChurchMatch || isDioceseMatch) {
+      count++;
+    }
+  }
+
+  return count;
 }
 Future<DioceseDetailModel?> getDioceseDetailsIn(String dioceseId) async {
   DatabaseEvent event = await mRoot.child("dioceseDetails").child(dioceseId).once();

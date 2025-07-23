@@ -4,6 +4,7 @@ import 'package:jsochurch/models/church_detail_model.dart';
 import 'package:jsochurch/models/diocese_detail_model.dart';
 import 'package:jsochurch/models/user_model.dart';
 import 'package:jsochurch/utils/my_functions.dart';
+import 'package:jsochurch/viewmodels/clergy_view_model.dart';
 import 'package:jsochurch/viewmodels/login_view_model.dart';
 import 'package:jsochurch/viewmodels/profile_view_model.dart';
 import 'package:jsochurch/viewmodels/select_parish_detail_view_model.dart';
@@ -2071,6 +2072,168 @@ void confirmDownloadDialog({
               ],
             ),
           ),
+        ),
+      );
+    },
+  );
+}
+
+void promotionPriestDialog(BuildContext context,String userId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      return AlertDialog(
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5.0))),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        content: Consumer2<EditViewModel,ClergyViewModel>(
+          builder: (_, ev,cv, __) {
+            return SingleChildScrollView(
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * .6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 5),
+                    const Text(
+                      "Promote to Priest",
+                      style: TextStyle(fontFamily: "poppinsMedium", fontSize: 20),
+                    ),
+                    Divider(
+                      color: Colors.black87.withOpacity(0.3),
+                      indent: 5,
+                      endIndent: 5,
+                    ),
+                    const SizedBox(height: 15),
+
+                    /// Ordination Date Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        customBoldText(
+                          text: "Ordination date",
+                          color: myBlack,
+                          fontSize: 14,
+                        ),
+                        const SizedBox(height: 5),
+                        dateField(
+                          context,
+                          "",
+                          ev.ordinationDateController,
+                          GlobalKey<FormState>(),
+                          "validateString",
+                          ev.ordinationDate ?? DateTime.now(),
+                        ),
+                        const SizedBox(height: 15),
+                      ],
+                    ),
+
+                    /// Ordination as Priest Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        customBoldText(
+                          text: "Ordination as priest",
+                          color: myBlack,
+                          fontSize: 14,
+                        ),
+                        const SizedBox(height: 5),
+                        textField(
+                          context,
+                          "",
+                          ev.ordinationPriestController,
+                          GlobalKey<FormState>(),
+                          "validateString",
+                        ),
+                        const SizedBox(height: 15),
+                      ],
+                    ),
+
+                    /// Action Buttons
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * .2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                borderRadius: const BorderRadius.all(Radius.circular(30)),
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true).pop();
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: buttonBlue,
+                                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        spreadRadius: 2,
+                                        blurRadius: 1,
+                                        offset: const Offset(0.5, 0.7),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Text(
+                                    "Cancel",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "poppinsMedium",
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: InkWell(
+                                borderRadius: const BorderRadius.all(Radius.circular(30)),
+                                onTap: () {
+                                  cv.promoteDeaconToPriest(context,dialogContext, userId,ev.ordinationPriestController.text,ev.ordinationDate.toString());
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.all(10),
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: buttonBlue,
+                                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        spreadRadius: 2,
+                                        blurRadius: 1,
+                                        offset: const Offset(0.5, 0.7),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Text(
+                                    "Promote",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "poppinsMedium",
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       );
     },
