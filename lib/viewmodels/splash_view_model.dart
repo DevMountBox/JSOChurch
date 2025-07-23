@@ -19,8 +19,8 @@ import 'home_view_model.dart';
 import 'login_view_model.dart';
 
 class SplashViewModel extends ChangeNotifier{
-  int appVersion=7;
-  String appViewVersion="1.0.6";
+  int appVersion=8;
+  String appViewVersion="1.0.7";
 
   Future<void> setInitialPage() async {
     SharedPreferences userPreference = await SharedPreferences.getInstance();

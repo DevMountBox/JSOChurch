@@ -16,6 +16,7 @@ const myClergy1 = Color(0XFF34228F);
 const myClergy2 = Color(0XFF006341);
 const myClergy3 = Color(0XFFB26205);
 const myClergy4 = Color(0XFFAD1D00);
+const myClergy5 = Color(0xFFD4AF37);
 const myOtherChurch1 = Color(0XFF308AFF);
 const myOtherChurch2 = Color(0XFF23A15D);
 const myOtherChurch3 = Color(0XFFD67507);

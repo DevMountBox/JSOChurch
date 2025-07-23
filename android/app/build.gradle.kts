@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.app.jsochurch"
+    namespace = "com.sit.jsochurch"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 

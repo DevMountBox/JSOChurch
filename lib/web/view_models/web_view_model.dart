@@ -161,8 +161,8 @@ class WebViewModel extends ChangeNotifier {
       "primaryAtId":dioceseId
     };
     Map<String, dynamic> userSecondaryData = {
-      "secondaryVicarAt":dioceseNameController.text,
-      "secondaryVicarAtId":dioceseId
+      "assistantAt":dioceseNameController.text,
+      "assistantAtId":dioceseId
     };
     Map<String, dynamic> dioceseData = {
       "dioceseName": dioceseNameController.text,
@@ -641,7 +641,8 @@ class WebViewModel extends ChangeNotifier {
       "metropolitans",
       "corepiscopa",
       "priest",
-      "ramban"
+      "ramban",
+      "deacons"
     ];
 
     for (var a in map) {

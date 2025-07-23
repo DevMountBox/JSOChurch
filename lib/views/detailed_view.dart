@@ -838,7 +838,7 @@ class DetailedView extends StatelessWidget {
                             height: 10,
                           ),
                           customNormalText(
-                              text: "Ordination as priest",
+                              text: "Ordained by",
                               color: myGreyText,
                               fontSize: 14),
                           const SizedBox(

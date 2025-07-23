@@ -23,7 +23,8 @@ class ClergyView extends StatelessWidget {
         builder: (_,cv,__) {
           return DefaultTabController(
             initialIndex: cv.tabIndex!,
-            length: 4,
+
+            length: 5,
             child: Scaffold(
               backgroundColor: myWhite,
               appBar: AppBar(
@@ -64,6 +65,10 @@ class ClergyView extends StatelessWidget {
                             cv.getClergyList("priest");
                             cv.setClergyType("priest");
 
+                          }else if (index == 4) {
+                            cv.getClergyList("deacons");
+                            cv.setClergyType("deacons");
+
                           }
                         },
                         tabAlignment: TabAlignment.start,
@@ -83,6 +88,7 @@ class ClergyView extends StatelessWidget {
                           Tab(text: 'Cor-episcopas'),
                           Tab(text: 'Ramban'),
                           Tab(text: 'Priest'),
+                          Tab(text: 'Deacons'),
 
                         ],
                       ),
@@ -93,6 +99,7 @@ class ClergyView extends StatelessWidget {
               body: TabBarView(
                 children: [
                   metropolitansWidget(context),
+                  fatherWidget(context),
                   fatherWidget(context),
                   fatherWidget(context),
                   fatherWidget(context),

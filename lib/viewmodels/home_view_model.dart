@@ -21,6 +21,7 @@ class HomeViewModel extends ChangeNotifier {
     ClergyDashboardModal(
         "Cor-episcopa", "5", "episcopa", "corepiscopa", myClergy3),
     ClergyDashboardModal("Ramban", "5", "ramban", "ramban", myClergy4),
+    ClergyDashboardModal("Deacons", "5", "ramban", "deacons", myClergy5),
   ];
 
   List<OtherChurchDashboardModel> otherChurchList = [

@@ -66,7 +66,8 @@ class EditViewModel extends ChangeNotifier {
     "metropolitans",
     "corepiscopa",
     "priest",
-    "ramban"
+    "ramban",
+    "deacons"
   ];
   String selectedClergyType="";
   getChurchDetailsAndStatus() async {
